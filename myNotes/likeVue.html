@@ -1,0 +1,49 @@
+<!-- 模拟Vue的模板解析 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">
+      <div>
+        <p>{{name}}-{{message}}</p>
+      </div>
+      <p>{{name}}</p>
+      <p>{{message}}</p>
+    </div>
+
+    <script>
+      let rkuohao = /\{\{(.+?)\}\}/g;
+      let tmpNode = document.querySelector("#root");
+      let data = {
+        name: "一个新的demo",
+        message: "一个消息",
+      };
+      function compiler(template, data) {
+        let childNodes = template.childNodes;
+        for (let i in childNodes) {
+          let type = childNodes[i].nodeType; // 有关nodeType的说明可以参考‘红宝书第四版’p402
+          if (type === 3) {
+            let txt = childNodes[i].nodeValue;
+            txt = txt.replace(rkuohao, function (_, g) {
+              // 第0个参数，表示匹配到的内容
+              // 第n个参数，表示正则中的第n组，分组：在正则表达式中用()括起来表示的一个整体
+              let key = g.trim();
+              return data[key];
+            });
+            childNodes[i].nodeValue = txt;
+          } else if (type === 1) {
+            compiler(childNodes[i], data);
+          }
+        }
+      }
+      let generateNode = tmpNode.cloneNode(true);
+      compiler(generateNode, data);
+      root.parentNode.replaceChild(generateNode, root);
+    </script>
+  </body>
+</html>
