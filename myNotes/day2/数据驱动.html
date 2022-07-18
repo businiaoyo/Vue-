@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">
+      <div class="c1">
+        <div title="tt1" id="id">hello1</div>
+        <div title="tt2">hello2</div>
+        <div title="tt3">hello3</div>
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      class VNode {
+        constructor(tag, data, value, type) {
+          this.tag = tag && tag.toLowerCase();
+          this.data = data;
+          this.value = value;
+          this.type = type;
+          this.children = [];
+        }
+        appendChild(vnode) {
+          this.children.push(vnode);
+        }
+      }
+      function getVNode(node) {
+        let nodeType = node.nodeType;
+        let _vnode = null;
+        if (nodeType === 1) {
+          let nodeName = node.nodeName;
+          let attrs = node.attributes;
+        }
+      }
+    </script>
+  </body>
+</html>
