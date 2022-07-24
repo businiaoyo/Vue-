@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>await promis</title>
+    </head>
+    <body>
+        hello await promis
+    </body>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        async function getRes(){
+            let x = "x";
+            // let res = await axios.get('/api/123');
+            // x = res.data;
+            // console.log('xx', x);
+            
+            axios.get('/api/123').then(
+                res => {
+                    x = res.data;
+                }
+            )
+            console.log("xx", x);
+        }
+        getRes();
+    </script>
+</html>
