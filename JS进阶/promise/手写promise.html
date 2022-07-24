@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <title>
+            手写promise
+        </title>
+    </head>
+    <body>
+        手写promise
+    </body>
+    <script>
+        // 参考：https://juejin.cn/post/6994594642280857630
+        class MyPromise{
+            constructor(executor){
+                this.initValue();
+                this.initBind();
+                // new Promise( resolve, reject ) 
+                // 实质是传递了一个函数
+                // 它的参数是两个函数resolve,reject
+                executor(this.resolve, this.reject);
+            }
+
+            initBind(){
+                this.resolve = this.resolve.bind(this);
+                this.resolvej = this.reject.bind(this);
+            }
+
+            initValue(){
+                this.PromiseResult = null;
+                this.PromiseState = 'pending';
+            }
+
+            resolve(value){
+                this.PromiseState = 'fulfilled';
+                this.PromiseResult = value;
+            }
+
+            reject(reason){
+                this.PromiseState = 'rejected'
+                this.PromiseResult = reason
+            }
+        }
+        const test1 = new MyPromise((resolve, reject) => {
+            resolve("成功")
+        })
+    </script>
+</html>
