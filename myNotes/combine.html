@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <!-- 写模板 -->
+  <div id="root">
+    <div>
+      <p>{{name}}-{{message}}</p>
+    </div>
+    <p>{{name}}</p>
+    <p>{{message}}</p>
+  </div>
+
+  <script>
+    class VNode {
+      constructor( tag, data, value, type ) {
+        this.tag = tag && tag.toLowerCase();
+        this.data = data;
+        this.value = value;
+        this.type = type;
+        this.children = [];
+      }
+
+      appendChild ( vnode ) {
+        this.children.push( vnode );
+      }
+    }
+    let rekuohao = /\{\{.+?\}\}/
+    function combine(vnode, data){
+       let _vnode = null;
+       let _tag = vnode.tag;
+       let _data = vnode._data;
+       let _type =  vnode.type;
+       let _value = vnode.value;
+       let _children = vnode.children;
+       if(_type === 3){
+         // 文字
+         _value = _value.replace(rekuohao, function(_, g){
+            return data[g.trim()];
+         })
+         _vnode = new VNode(_tag, _data, _value, _type);
+       }else if(_type === 1){
+         // 子
+         for(let node of _children){
+           _vnode.appendChild(combine(node));
+         }
+       }
+       return _vnode;
+    }
+  </script>
+</body>
+</html>
