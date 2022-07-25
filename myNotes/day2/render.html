@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">
+      <div class="c1">
+        <div title="tt1" id="id">{{name}}</div>
+        <div title="tt2">{{age}}</div>
+        <div title="tt3">{{address}}</div>
+      </div>
+    </div>
+
+    <script>
+      // data数据
+      const data = {
+        name: "邓玉龙",
+        age: "22",
+        address: "北京"
+      };
+      // vnode结构
+      class VNode {
+        constructor(tag, data, value, type) {
+          this.tag = tag;
+          this.data = data;
+          this.value = value;
+          this.type = type;
+          this.children = [];
+        }
+        appendChild(vnode) {
+          this.children.push(vnode);
+        }
+      }
+      // 替换{{}}的正则
+      let flagRe = /\{\{(.+?)\}\}/g;
+      // 1.2 使用Data将{{}}中的值替换
+      function compiler(rnode, data) {
+        let childNodes = rnode.childNodes;
+        for (let i = 0; i < childNodes.length; i++) {
+          if (childNodes[i].nodeType === 3) {
+            // 文本结点，进行替换
+            let text = childNodes[i].nodeValue;
+            text = text.replace(flagRe, function(_, g) {
+              let key = g.trim();
+              let value = data[key];
+              return value;
+            });
+            childNodes[i].nodeValue = text;
+          } else if (childNodes[i].nodeType === 1) {
+            compiler(childNodes[i], data);
+          }
+        }
+      }
+      // 1.生成ast, 带{{}}的结点
+      // 1.1 获取真实的dom
+      let rnode = document.querySelector("#root");
+      // 1.2 解析出带{{}}的dom树结构
+      function getVnode(node) {
+        let nodeType = node.nodeType;
+        let _vnode = null;
+        if (nodeType === 1) {
+          // 处理元素
+          let tagName = node.nodeName;
+          let attrs = node.attributes;
+          let _attrObj = {};
+          for (let i = 0; i < attrs.length; i++) {
+            // 这里的nodeName是说属性的名字
+            _attrObj[attrs[i].nodeName] = attrs[i].nodeValue;
+          }
+          _vnode = new VNode(tagName, _attrObj, undefined, nodeType);
+
+          // 处理子元素
+          let childNodes = node.childNodes;
+          for (let i = 0; i < childNodes.length; i++) {
+            _vnode.appendChild(getVnode(childNodes[i]));
+          }
+        } else if (nodeType === 3) {
+          _vnode = new VNode(undefined, undefined, node.nodeValue, nodeType);
+        }
+        return _vnode;
+      }
+      let vnode = getVnode(rnode);
+      debugger;
+
+      // 复制一个，不然浅拷贝会直接改页面的dom,就没有模板之意了
+      // let node = rnode.cloneNode(true);
+      // compiler(node, data);
+      // ast+data 转 vnode
+    </script>
+  </body>
+</html>
