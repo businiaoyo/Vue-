@@ -1,46 +1,118 @@
 <html>
-    <head>
-        <title>
-            手写promise
-        </title>
-    </head>
-    <body>
-        手写promise
-    </body>
-    <script>
-        // 参考：https://juejin.cn/post/6994594642280857630
-        class MyPromise{
-            constructor(executor){
-                this.initValue();
-                this.initBind();
-                // new Promise( resolve, reject ) 
-                // 实质是传递了一个函数
-                // 它的参数是两个函数resolve,reject
-                executor(this.resolve, this.reject);
-            }
-
-            initBind(){
-                this.resolve = this.resolve.bind(this);
-                this.resolvej = this.reject.bind(this);
-            }
-
-            initValue(){
-                this.PromiseResult = null;
-                this.PromiseState = 'pending';
-            }
-
-            resolve(value){
-                this.PromiseState = 'fulfilled';
-                this.PromiseResult = value;
-            }
-
-            reject(reason){
-                this.PromiseState = 'rejected'
-                this.PromiseResult = reason
-            }
+  <head>
+    <title>
+      手写promise
+    </title>
+  </head>
+  <body>
+    手写promise
+  </body>
+  <script>
+    // 参考：https://juejin.cn/post/6994594642280857630
+    // bind() https://juejin.cn/post/6844903496253177863 或者应该去翻书
+    class MyPromise {
+      constructor(executor) {
+        this.initValue();
+        this.initBind();
+        // new Promise( resolve, reject )
+        // 实质是传递了一个函数
+        // 它的参数是两个函数resolve,reject
+        try {
+          executor(this.resolve, this.reject);
+        } catch (e) {
+          this.reject(e);
         }
-        const test1 = new MyPromise((resolve, reject) => {
-            resolve("成功")
-        })
-    </script>
+      }
+
+      initBind() {
+        this.resolve = this.resolve.bind(this);
+        this.resolvej = this.reject.bind(this);
+      }
+
+      initValue() {
+        this.PromiseResult = null;
+        this.PromiseState = "pending";
+        this.onFulfilledCallbacks = [];
+        this.onRejectedCallbacks = [];
+      }
+
+      resolve(value) {
+        if (this.PromiseState !== "pending") return;
+        this.PromiseState = "fulfilled";
+        this.PromiseResult = value;
+        // 等状态确定了再执行对应的回调
+        while (this.onFulfilledCallbacks.length) {
+          this.onFulfilledCallbacks.shift()(this.PromiseResult);
+        }
+      }
+
+      reject(reason) {
+        if (this.PromiseState !== "pending") return;
+        this.PromiseState = "rejected";
+        this.PromiseResult = reason;
+        while (this.onRejectedCallbacks.length) {
+          this.onRejectedCallbacks.shift()(this.PromiseResult);
+        }
+      }
+
+      then(onFulfilled, onRejected) {
+        onFulfilled =
+          typeof onFulfilled === "function" ? onFulfilled : val => val;
+        onRejected =
+          typeof onRejected === "function"
+            ? onRejected
+            : reason => {
+                throw reason;
+              };
+        var thenPromise = new MyPromise((resolve, reject) => {
+          // 最终执行的函数
+          const resolvePromise = cb => {
+            try {
+              // res => {} 的返回值
+              const x = cb(this.PromiseResult);
+              if (x === thenPromise) {
+                throw new Error("不能返回自身");
+              }
+              if (x instanceof MyPromise) {
+                x.then(resolve, reject);
+              } else {
+                return x;
+              }
+            } catch (err) {
+              reject(err);
+              throw new Error(err);
+            }
+          };
+          if (this.PromiseState === "fulfilled") {
+            resolvePromise(onFulfilled);
+          } else if (this.PromiseState === "rejected") {
+            resolvePromise(onRejected);
+          } else if (this.PromiseState === "pending") {
+            this.onFulfilledCallbacks.push(
+              resolvePromise.bind(this, onFulfilled)
+            );
+            this.onRejectedCallbacks.push(
+              resolvePromise.bind(this, onRejected)
+            );
+          }
+        });
+
+        if (this.PromiseState === "fulfilled") {
+          onFulfilled(this.PromiseResult);
+        } else if (this.PromiseState === "rejected") {
+          onRejected(this.PromiseResult);
+        } else if (this.PromiseResult === "pending") {
+          this.onFulfilledCallbacks.push(onFulfilled.bind(this));
+          this.onRejectedCallbacks.push(onRejected.bind(this));
+        }
+        return thenPromise;
+      }
+    }
+    const test1 = new MyPromise((resolve, reject) => {
+      resolve("成功");
+    });
+    test1.then(res => {
+      console.log(res);
+    });
+  </script>
 </html>
