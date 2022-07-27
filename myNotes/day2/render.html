@@ -84,8 +84,24 @@
         return _vnode;
       }
       let vnode = getVnode(rnode);
-      debugger;
-
+      // 将vnode中的{{}}解析出来
+      function combine(vnode, data){
+        let nodeType = vnode.nodeType;
+        if(nodeType === 1){
+          let childNodes = vnode.childNodes;
+          for(let i=0; i<childNodes.length; i++){
+            combine(childNodes[i], data);
+          }
+        }else if(nodeType === 3){
+          // 文本结点， 匹配{{}} 并替换
+          let text = vnode.value;
+          text = text.replace(flagRe, function(_, g){
+            // g就是{{}}中的内容
+            return data[g.trim()]
+          })
+          vnode.value = text;
+        }
+      } 
       // 复制一个，不然浅拷贝会直接改页面的dom,就没有模板之意了
       // let node = rnode.cloneNode(true);
       // compiler(node, data);
