@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title>
+      手写promise
+    </title>
+  </head>
+  <body>
+    手写promise
+  </body>
+  <script>
+    let p = new Promise((resolve, reject) => {
+        setTimeout(() => {
+            console.log("promise 回调");
+            resolve("yes");
+        }, 2000)
+    })
+    let nextP = p.then( res => {
+        console.log("then 回调")
+    })
+    nextP.then( res => {
+        console.log("nextP then", res);
+        console.log(nextP);
+    })
+    console.log("nextPState", nextP);
+    // let x = async function asyncTest(){
+    //     console.log("yes");
+    // }()
+    // console.log("x", x);
+
+    // let isPending = new Promise((x, y)=>{
+    //     console.log("isPending");
+    // })
+    // isPending.then( res=>{
+    //     console.log("isPending", res);
+    // })
+    
+    
+  </script>
+</html>
